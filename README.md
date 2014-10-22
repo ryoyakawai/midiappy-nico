@@ -10,7 +10,7 @@
 
 # 説明
  - キーボド操作
-  - [0] Start/Stop
-  - [f] fullscreen
-  - [m] display emulated mouse pointer
-  - [x] change display mode(nicofarre mode/normal mode)
+  - [ 0 ] Start/Stop
+  - [ f ] fullscreen
+  - [ m ] display emulated mouse pointer
+  - [ x ] change display mode(nicofarre mode/normal mode)
