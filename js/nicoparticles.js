@@ -14,33 +14,6 @@ var position = {
     "c":{"tl":{"x":40, "y":360}, "tr":{"x":1520, "y":360}, "bl":{"x":40, "y":640}, "br":{"x":1520, "y":640}}
 };
 
-document.body.addEventListener("keydown", function(event){
-    switch(event.keyCode) {
-      case 48: // pause/start : keycode=48, (key:0)
-        paused=!paused;
-        console.log("[stopped] ", event.keyCode);
-        break;
-      case 70: // fullscreen : keycode=70, (key:f)
-        document.body.webkitRequestFullscreen();
-        console.log("[fullscreen] ", event.keyCode);
-        break;
-      case 77: // emulated mouse cursor on : keycode=77, (key:m)
-        mouseCursor=!mouseCursor;
-        console.log("[display cursor] ", event.keyCode);
-        break;
-      case 88: // change mode : keycode=88, (key:x)
-        if(document.getElementById("nico_c").style.display=="block") {
-            document.getElementById("nico_c").style.setProperty("display", "none");
-            document.getElementById("canvas").style.setProperty("display", "block");
-        } else {
-            document.getElementById("nico_c").style.setProperty("display", "block");
-            document.getElementById("canvas").style.setProperty("display", "none");
-        }
-        console.log("[changed display format] ", event.keyCode);
-        break;
-    }
-});
-
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 var innerW=ctx.canvas.width, innerH=ctx.canvas.height;

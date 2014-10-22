@@ -14,3 +14,4 @@
   - [ f ] fullscreen
   - [ m ] display emulated mouse pointer
   - [ x ] change display mode(nicofarre mode/normal mode)
+  - [ g ] disp video from webcam

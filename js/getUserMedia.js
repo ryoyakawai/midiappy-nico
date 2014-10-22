@@ -4,7 +4,8 @@ var getUserMedia = navigator.getUserMedia ? 'getUserMedia' :
     navigator.msGetUserMedia ? 'msGetUserMedia' :
     undefined;
 
-var localMediaStream;
+var localMediaStream, timerId;
+var videoRunning=false;
 var video=document.getElementById("video");
 function startStream(elemId) {
     navigator[getUserMedia](
@@ -23,10 +24,19 @@ var vctx=vcanvas.getContext("2d");
 function draw() {
     nico_ctx.drawImage(video, 1560, 360, 160, 280);
     nico_ctx.drawImage(video, 1560, 40, 160, 280);
-    requestAnimationFrame(function(){
+    timerId=requestAnimationFrame(function(){
         draw();
     });
 }
+function stopDraw() {
+    cancelAnimationFrame(timerId);
+    videoRunning=false;
+}
+function startDraw() {
+    draw();
+    videoRunning=true;
+}
 
 startStream("video");
-draw();
+startDraw();
+
