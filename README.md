@@ -5,7 +5,7 @@
  - specs: nico farreのディスプレイの仕様を入れています
 
 # 座標図
-![grid](https://raw.github.com/ryoyakawai/midiappy-nico/master/images/nico_grid.jpg)  
+![grid](https://raw.githubusercontent.com/ryoyakawai/midiappy-nico/master/specs/nico_grid.jpg)  
 [display spec from nicofarre](http://nicofarre.jp/smarty.php?tmpl=led_format.html&sctn=led_format)  
 
 # 説明
