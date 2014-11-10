@@ -11,7 +11,10 @@
 # 説明
  - キーボド操作
   - [ 0 ] Start/Stop
+  - [ 1 ] Speed Down
+  - [ 2 ] Speed Up
   - [ f ] fullscreen
+  - [ r ] re-initialize particles positions
   - [ m ] display emulated mouse pointer
   - [ x ] change display mode(nicofarre mode/normal mode)
   - [ g ] disp video from webcam

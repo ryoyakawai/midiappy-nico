@@ -1,9 +1,17 @@
 var paused = false;
+var frame_update=230; // default:80 update timing (speed)
+/* configuration for initializing particles position */
+var lastUpdatedTime=getUnixTime(), drawPositionInterval=300; // sec
+function forceUpdateParticlePosition(){
+    lastUpdatedTime=getUnixTime()-drawPositionInterval-100;
+}
+
 
 var hw = 0, hh = 0;
-var pCount=34;
+var pCount=54;
 var midiappyNo=pCount/2;
 var mouseCursor=false;
+var w3cNo=1+pCount/2;
 
 var scene1;
 var activeScene;
@@ -28,7 +36,6 @@ var nico_e = document.getElementById("nico_e");
 var nico_e_ctx = nico_e.getContext("2d");
 
 setTimeout(function() {
-
     CanvasRenderingContext2D.prototype.clear = function() {
         this.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.beginPath();
@@ -60,26 +67,63 @@ setTimeout(function() {
     hw = width / 2;
     hh = height / 2;
     
-    //ctx.canvas.width = width;
-    //ctx.canvas.height = height;
-    
     scene1 = new Scene(pCount, hw, hh);
     activeScene = scene1;
     
     setTimeout(running, 100);
-        
 }, 100);
 
+
+
 // load midiappy
+var midiappySlot={
+    "path": ["images/00.png", "images/01.png", "images/02.png", "images/03.png", "images/04.png", "images/05.png","images/06.png", "images/07.png", "images/08.png"],
+    "img": [],
+    "ready" :[],
+    "opacity":0.4,
+    "rotate":0.001,
+    "yDirection": 1
+};
+for(var i=0; i<midiappySlot.path.length; i++) {
+    midiappySlot.img[i]=new Image();
+    midiappySlot.img[i].src=midiappySlot.path[i];
+    midiappySlot.img[i].id="midiapi_"+i;
+    midiappySlot.img[i].addEventListener("load", function(event){
+        midiappySlot.ready[event.target.id.replace(/midiapi_/, '')]=true;
+    });
+}
 var img=new Image();
-img.src="images/midiappy.png";
+img.src="images/midiappy.png"; //images/00.png";
 var midiappy_loaded=false;
 img.addEventListener("load", function(){
     midiappy_loaded=true;
 });
 
+// load w3c logo
+var w3cSlot={
+    "path": ["images/w3c_00.png", "images/w3c_01.png"],
+    "img": [],
+    "ready" :[],
+    "opacity":0.1,
+    "rotate":0.001,
+    "yDirection": 1
+};
+var imgw3c=new Image();
+for(var i=0; i<w3cSlot.path.length; i++) {
+    w3cSlot.img[i]=new Image();
+    w3cSlot.img[i].src=w3cSlot.path[i];
+    w3cSlot.img[i].id="w3c_"+i;
+    w3cSlot.img[i].addEventListener("load", function(event){
+        w3cSlot.ready[event.target.id.replace(/w3c_/, '')]=true;
+    });
+    w3cSlot.opacity[i]=0.4;
+}
+imgw3c.src="images/w3c_00.png";
+
+
+
 mouseEmu();
-var fPos={"x":{"fix":[1000, 2320, 3220, 2320], "count":0}};
+var fPos={"x":{"fix":[1000, 2320, 3320, 2320], "count":0}};
 function mouseEmu() {
     setTimeout(function(){
         if(typeof scene1!="undefined") {
@@ -90,7 +134,7 @@ function mouseEmu() {
                 }
             }
 
-            var limit={"x":200, "y":0};
+            var limit={"x":20, "y":0};
             scene1.mx=fPos.x.fix[fPos.x.count++%fPos.x.fix.length];
             if(fPos.x.count>1000)fPos.x.count=0;
             scene1.my=height/2;
@@ -100,25 +144,45 @@ function mouseEmu() {
                 ctx.beginPath();
                 var bc=ctx.fillStyle;
                 ctx.fillRect(scene1.mx, scene1.my, 100, 100);
-                ctx.fillStyle="#ffffff";
+                ctx.fillStyle="#ff0000";
                 ctx.fill();
                 ctx.fillStyle=bc;
                 ctx.closePath();
             }
         }
         mouseEmu();
-    }, 4850+(rand(2)==1?1:-1)*1*Math.random());
+    }, 6850+(rand(2)==1?1:-1)*1*Math.random());
+}
+
+function changeSpeed(type) {
+    switch(type) {
+      case "down":
+        if(frame_update<400) {
+            frame_update+=5;
+        }
+        break;
+      case "up":
+        if(frame_update>60) {
+            frame_update-=5;
+        }
+        break;
+    }
+    return frame_update;
 }
 
 function running(){
     if(paused){
-        setTimeout(running, 100);
+        setTimeout(running, 5000);
     } else {
         ctx.clear();
-        //ctx.showFps(width - 70, 10);
-        scene1.frame();
+        var options={"initDraw":false};
+        if(getUnixTime()-lastUpdatedTime>drawPositionInterval) {
+            lastUpdatedTime=getUnixTime();
+            options={"initDraw":true};
+        }
+        scene1.frame(options);
         ctx.updateFps();
-        setTimeout(running, 40); // default:80 update timing
+        setTimeout(running, frame_update); // update timing (speed)
     }
 }
 function Scene(max, mx, my) { // max:particle count
@@ -131,21 +195,27 @@ function Scene(max, mx, my) { // max:particle count
     this.behavior = 1;
     this.status = 1;
     
-    this.frame = function() {
+    this.frame = function(options) {
         for (var i = 0; i < pts.length; i++) {
-            
-            if (pts[i] == null) {
+            if (pts[i] == null || options.initDraw===true) {
+                console.log("<SCRIPT> [Initialized particles position]");
                 var size = rand(5) + 30;
                 pts[i] = {
                     x: width/2+(rand(2)==1?1:-1)*rand(width), y: height/2+(rand(2)==1?1:-1)*rand(100),
                     size: size, hsize: size / 2, r: 10, a: Math.PI,
-                    speed: Math.random() + 0.5,
+                    speed: Math.random() * 0.005,
                     kx: 0, ky: 0, frame: rand(20) + 10, 
                     color: new Color(rand(200) + 55, rand(200) + 55, rand(200) + 55, rand(5) / 10 + 0.2),
                     direct: {"x": 1, "y":1}
                 };
                 if(i==midiappyNo) {
-                    pts[i]["x"]=width/2+(rand(2)==1?1:-1)*(100+rand(100));
+                    //pts[i]["x"]=width/2+(rand(2)==1?1:-1)*(100+rand(100));
+                    pts[i]["x"]=3000;
+                    pts[i]["y"]=height/2;
+                }
+                if(i==w3cNo) {
+                    //pts[i]["x"]=width/2+(rand(2)==1?1:-1)*(100+rand(100))+200;
+                    pts[i]["x"]=500;
                     pts[i]["y"]=height/2;
                 }
                 pts[i].backupa = pts[i].color.a;
@@ -162,7 +232,7 @@ function Scene(max, mx, my) { // max:particle count
             var miny = Math.cos(pt.a) * pt.speed * 2;
             
             var t=1;
-            if(i==midiappyNo) {
+            if(i==midiappyNo || i==w3cNo) {
                 t=0.0005;
             }
             pt.kx += Math.sin(oa) + minx * 0.05;
@@ -176,13 +246,14 @@ function Scene(max, mx, my) { // max:particle count
             pt.size = 18 + Math.sin(pt.a) * 5;
             pt.sizem = 0.6*pt.size;
             
-            if(i==midiappyNo/*Math.floor(pts.length/2)*/) {
-                drawPtm(pt);
+            if(i==midiappyNo /* Math.floor(pts.length/2) */) {
+                drawPtm(pt, "midiappy");
+            } else if(i==w3cNo){
+                drawPtm(pt, "w3c");
             } else {
                 drawPt(pt);
             }
         }
-
         
         var nico_c={
             "d-l": ctx.getImageData(   0, 0,  420, 280),
@@ -215,7 +286,9 @@ function Scene(max, mx, my) { // max:particle count
         for (var i = 0; i < pts.length; i++) {
             if(typeof pts[i] !="undefined" && typeof pts[i] !="undefined" ) {
                 pts[i].kx *= 1.4;
-                if(i!=midiappyNo) pts[i].ky *= 1.005;
+                if(i!=midiappyNo || i!=w3cNo) {
+                    pts[i].ky *= 1.05;
+                }
             }
         }
     };
@@ -236,14 +309,16 @@ function drawPt(pt) {
     ctx.fillStyle = pt.color.rgba();
     ctx.closePath();
     ctx.fill();
-    
 }
-var rotate=0.001;
-function drawPtm(pt) {
+//var rotate=0.001;
+function drawPtm(pt, type) {
     var scale=pt.sizem;
     if(rand(100)<40) {
         if(Math.random() > 0.3) {
-            rotate=0.2*(Math.random() > 0.5 ? 1 : -1) * Math.random();
+            midiappySlot.rotate=0.2*(Math.random() > 0.5 ? 1 : -1) * Math.random();
+        }
+        if(Math.random() > 0.3) {
+            w3cSlot.rotate=0.2*(Math.random() > 0.5 ? 1 : -1) * Math.random();
         }
     }
 
@@ -251,24 +326,62 @@ function drawPtm(pt) {
     if (pt.frame > 0) {
         pt.frame--;
         pt.color.a = pt.backupa;
-        ctx.globalAlpha = updateOpacity(scale*pt.size);;
+        //ctx.globalAlpha = updateOpacity("midiappy");
+        //if(ctx.globalAlpha<=0.1 && rand(10) < 7) {
+        ctx.globalAlpha = midiappySlot.opacity;
+        switch(type) {
+          case "midiappy":
+            var imgNum=rand(midiappySlot.path.length-1);
+            if(midiappySlot.ready[imgNum]===true) {
+                midiappySlot.img[imgNum].style.opacity=updateOpacity("midiappy");
+                if(midiappySlot.opacity<=0.15 && rand(10) < 8) {
+                    img=midiappySlot.img[imgNum];
+                }
+            }
+            break;
+          case "w3c":
+            var imgNum=rand(w3cSlot.path.length-1);
+            if(w3cSlot.ready[imgNum]===true) {
+                w3cSlot.img[imgNum].style.opacity=updateOpacity("w3c");
+                if(w3cSlot.opacity<=0.15 && rand(10) < 7) {
+                    imgw3c=w3cSlot.img[imgNum];
+                }
+            }
+            break;
+        }
         // (1) 原点書きたい場所に移動
         // (2) 回転
         // (3) 画像の半分をづらして描画
         ctx.translate(pt.x, pt.y);
-        ctx.rotate(rotate);
-        ctx.drawImage(img, -1*scale*pt.size/2, -1*scale*pt.size/2, scale*pt.size, scale*pt.size);
-        ctx.rotate(-1*rotate);
+        switch(type) {
+          case "midiappy":
+            ctx.rotate(midiappySlot.rotate);
+            ctx.drawImage(img, -1*scale*pt.size/2, -1*scale*pt.size/2, scale*pt.size, scale*pt.size);
+            ctx.rotate(-1*midiappySlot.rotate);
+            break;
+          case "w3c":
+            ctx.rotate(w3cSlot.rotate);
+            ctx.drawImage(imgw3c, -1*scale*pt.size/2, -1*scale*pt.size/2, 130, 130);
+            ctx.rotate(-1*w3cSlot.rotate);
+            break;
+        }
         ctx.translate(-1*(pt.x), -1*(pt.y));
         ctx.globalAlpha = 1;
     } else {
         pt.frame = rand(20) + 40;
         pt.color.a = 1;
-        ctx.globalAlpha = updateOpacity(scale*pt.size);;
+        ctx.globalAlpha = midiappySlot.opacity;
         ctx.translate(pt.x, pt.y);
-        ctx.rotate(rotate);
-        ctx.drawImage(img, -1*scale*pt.size/2, -1*scale*pt.size/2, scale*pt.size, scale*pt.size);
-        ctx.rotate(-1*rotate);
+        if(type=="midiappy") {
+            ctx.rotate(midiappySlot.rotate);
+            ctx.drawImage(img, -1*scale*pt.size/2, -1*scale*pt.size/2, scale*pt.size, scale*pt.size);
+            ctx.rotate(-1*midiappySlot.rotate);
+        }
+        if(type=="w3c") {
+            ctx.rotate(w3cSlot.rotate);
+            ctx.drawImage(imgw3c, -1*scale*pt.size/2, -1*scale*pt.size/2, 130, 130);
+            ctx.rotate(-1*w3cSlot.rotate);
+        }
         ctx.translate(-1*(pt.x), -1*(pt.y));
         ctx.globalAlpha = 1;
     }
@@ -278,13 +391,30 @@ function drawPtm(pt) {
 }
 
 var op=1, ddd=1;
-function updateOpacity(val) {
+function updateOpacity(type) {
+    var op;
+    switch(type) {
+      case "midiappy":
+        op=midiappySlot.opacity;
+        break;
+      case "w3c":
+        op=w3cSlot.opacity;
+        break;
+    }
     if(op>=1) {
         ddd=-1;
-    } else if(op<=0.5) {
+    } else if(op<=0.1) {
         ddd=1;
     }
-    op+=ddd*Math.random()*0.1;
+    op+=ddd*Math.random()*0.05;
+    switch(type) {
+      case "midiappy":
+        midiappySlot.opacity=op;
+        break;
+      case "w3c":
+        w3cSlot.opacity=op;
+        break;
+    }
     return op;
 };
 
@@ -362,20 +492,19 @@ function drawNicoFrame(c){
 /* code sample */
 function rotateMidiappy() {
     if(load_done==true) {
-            conole.log("rotate");
-            var imgSize=500;
-            ctx.translate(300, 300);
-            ctx.drawImage(img, -1*imgSize/2, -1*imgSize/2, imgSize, imgSize);
-            
-            ctx.rotate(0.5);
-            
-            // render
-            ctx.drawImage(img, -1*imgSize/2, -1*imgSize/2, imgSize, imgSize);
-            
-            // back translation
-            ctx.rotate(-1*angle*Math.PI/180);
-            ctx.translate(-300, -300);
-            
+        conole.log("rotate");
+        var imgSize=500;
+        ctx.translate(300, 300);
+        ctx.drawImage(img, -1*imgSize/2, -1*imgSize/2, imgSize, imgSize);
+        
+        ctx.rotate(0.5);
+        
+        // render
+        ctx.drawImage(img, -1*imgSize/2, -1*imgSize/2, imgSize, imgSize);
+        
+        // back translation
+        ctx.rotate(-1*angle*Math.PI/180);
+        ctx.translate(-300, -300);
     }
 }
 
@@ -396,6 +525,4 @@ function Rect(x,y,width,height){
     this.Bottom = function() { return this.x+this.height;};
 }
 function rand(max) { return Math.round(Math.random() * max); }
-
-
-
+function getUnixTime() {  return ~~(new Date/1000); }

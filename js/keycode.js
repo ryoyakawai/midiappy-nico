@@ -4,6 +4,10 @@ document.body.addEventListener("keydown", function(event){
         paused=!paused;
         console.log("[stopped] ", event.keyCode);
         break;
+      case 82: // initialize particles position : keycode=82, (key:r)
+        forceUpdateParticlePosition();
+        console.log("[initialize particles position] ", event.keyCode);
+        break;
       case 70: // fullscreen : keycode=70, (key:f)
         document.body.webkitRequestFullscreen();
         console.log("[fullscreen] ", event.keyCode);
@@ -29,6 +33,14 @@ document.body.addEventListener("keydown", function(event){
             document.getElementById("canvas").style.setProperty("display", "none");
         }
         console.log("[changed display format] ", event.keyCode);
+        break;
+      case 49: // speed down : keycode=49, (key:1)
+        var out=changeSpeed("down");
+        console.log("[Speed Down] " + out + " (default:120)");
+        break;
+      case 50: // speed up : keycode=50, (key:2)
+        var out=changeSpeed("up");
+        console.log("[Speed Up] " + out + " (default:120)");
         break;
     }
 });
