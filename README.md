@@ -13,6 +13,8 @@
   - [ 0 ] Start/Stop
   - [ 1 ] Speed Down
   - [ 2 ] Speed Up
+  - [ 3 ] Frame Rate Down
+  - [ 4 ] Frame Rate Up
   - [ f ] fullscreen
   - [ r ] re-initialize particles positions
   - [ m ] display emulated mouse pointer
