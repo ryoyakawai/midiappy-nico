@@ -105,7 +105,7 @@ var w3cSlot={
     "path": ["images/w3c_00.png", "images/w3c_01.png"],
     "img": [],
     "ready" :[],
-    "opacity":0.1,
+    "opacity":0.4,
     "rotate":0.001,
     "rotateD":1,
     "yDirection": 1
@@ -122,19 +122,18 @@ for(var i=0; i<w3cSlot.path.length; i++) {
 }
 imgw3c.src="images/w3c_00.png";
 
-
-//mouseEmu();
 var fPos={"x":{"fix":[1000, 2320, 3320, 2320], "count":0}};
 function mouseCenter() {
     console.log("[Mouse Emulated at Center]");
     if(typeof scene1!="undefined") {
-        if(rand(100)<40) {
+
+//        if(rand(100)<40) {
             for(var i=0; i<rand(1); i++) {
                 scene1.blast();
                 console.log("[blasted]");
             }
-        }
-        
+//        }
+
         scene1.mx=2320;
         scene1.my=height/2;
         
@@ -149,36 +148,6 @@ function mouseCenter() {
             ctx.closePath();
         }
     }
-}
-//////////
-function mouseEmu2() {
-    setTimeout(function(){
-        if(typeof scene1!="undefined") {
-            if(rand(100)<40) {
-                for(var i=0; i<rand(1); i++) {
-                    scene1.blast();
-                    console.log("[blasted]");
-                }
-            }
-
-            var limit={"x":20, "y":0};
-            scene1.mx=fPos.x.fix[fPos.x.count++%fPos.x.fix.length];
-            if(fPos.x.count>1000)fPos.x.count=0;
-            scene1.my=height/2;
-            
-            if(mouseCursor==true) {
-                // mx, my: mouse x or y 
-                ctx.beginPath();
-                var bc=ctx.fillStyle;
-                ctx.fillRect(scene1.mx, scene1.my, 100, 100);
-                ctx.fillStyle="#ff0000";
-                ctx.fill();
-                ctx.fillStyle=bc;
-                ctx.closePath();
-            }
-        }
-        mouseEmu();
-    }, 20000);
 }
 
 function changeDeltaMoveRate(type) {
@@ -283,7 +252,7 @@ function Scene(max, mx, my) { // max:particle count
             
             pt.a = (pt.a + 0.1 * pt.speed) % (Math.PI * 2);
             
-            pt.x += deltaMoveRate * (pt.direct.x * (ox) * 0.01 + pt.kx);
+            pt.x +=  deltaMoveRate * (pt.direct.x * (ox) * 0.01 + pt.kx);
             pt.y += deltaMoveRate * (pt.direct.y * (oy) * 0.01 + pt.ky);
 
             pt.size = 18 + Math.sin(pt.a) * 5;
@@ -327,9 +296,9 @@ function Scene(max, mx, my) { // max:particle count
     this.blast = function() {
         for (var i = 0; i < pts.length; i++) {
             if(typeof pts[i] !="undefined" && typeof pts[i] !="undefined" ) {
-                pts[i].kx *= 1.4;
-                if(i!=midiappyNo || i!=w3cNo) {
-                    pts[i].ky *= 1.05;
+                if(i!=midiappyNo && i!=w3cNo) {
+                    pts[i].kx *= 1.09;
+                    pts[i].ky *= 1.2;
                 }
             }
         }
@@ -380,7 +349,7 @@ function drawPtm(pt, type) {
             var imgNum=rand(midiappySlot.path.length-1);
             if(midiappySlot.ready[imgNum]===true) {
                 midiappySlot.img[imgNum].style.opacity=updateOpacity("midiappy");
-                if(midiappySlot.opacity<=0.15 && rand(10) < 8) {
+                if(midiappySlot.opacity<=0.19 && rand(10) < 8) {
                     img=midiappySlot.img[imgNum];
                 }
             }
@@ -389,7 +358,7 @@ function drawPtm(pt, type) {
             var imgNum=rand(w3cSlot.path.length-1);
             if(w3cSlot.ready[imgNum]===true) {
                 w3cSlot.img[imgNum].style.opacity=updateOpacity("w3c");
-                if(w3cSlot.opacity<=0.15 && rand(10) < 7) {
+                if(w3cSlot.opacity<=0.19 && rand(10) < 7) {
                     imgw3c=w3cSlot.img[imgNum];
                 }
             }
@@ -469,7 +438,7 @@ function updateOpacity(type) {
     }
     if(op>=1) {
         ddd=-1;
-    } else if(op<=0.1) {
+    } else if(op<=0.2) {
         ddd=1;
     }
     op+=ddd*Math.random()*0.05;
