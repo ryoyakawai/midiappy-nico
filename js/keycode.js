@@ -36,11 +36,11 @@ document.body.addEventListener("keydown", function(event){
         break;
       case 49: // speed down : keycode=49, (key:1)
         var out=changeDeltaMoveRate("down");
-        console.log("[Delta X Down] " + out + " (default:0.05)");
+        console.log("[Delta X Down] " + out + " (default:0.065)");
         break;
       case 50: // speed up : keycode=50, (key:2)
         var out=changeDeltaMoveRate("up");
-        console.log("[Delta X Up] " + out + " (default:0.05)");
+        console.log("[Delta X Up] " + out + " (default:0.065)");
         break;
       case 51: // speed down : keycode=51, (key:3)
         var out=changeSpeed("down");
