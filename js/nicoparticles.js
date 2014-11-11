@@ -5,7 +5,7 @@ var lastUpdatedTime=getUnixTime(), drawPositionInterval=300; // sec
 function forceUpdateParticlePosition(){
     lastUpdatedTime=getUnixTime()-drawPositionInterval-100;
 }
-var deltaMoveRate=0.05;
+var deltaMoveRate=0.065;
 
 var hw = 0, hh = 0;
 var pCount=54;
