@@ -1,11 +1,11 @@
 var paused = false;
-var frame_update=230; // default:80 update timing (speed)
+var frame_update=140; // default:80 update timing (speed)
 /* configuration for initializing particles position */
 var lastUpdatedTime=getUnixTime(), drawPositionInterval=300; // sec
 function forceUpdateParticlePosition(){
     lastUpdatedTime=getUnixTime()-drawPositionInterval-100;
 }
-
+var deltaMoveRate=0.05;
 
 var hw = 0, hh = 0;
 var pCount=54;
@@ -82,6 +82,7 @@ var midiappySlot={
     "ready" :[],
     "opacity":0.4,
     "rotate":0.001,
+    "rotateD":1,
     "yDirection": 1
 };
 for(var i=0; i<midiappySlot.path.length; i++) {
@@ -93,7 +94,7 @@ for(var i=0; i<midiappySlot.path.length; i++) {
     });
 }
 var img=new Image();
-img.src="images/midiappy.png"; //images/00.png";
+img.src="images/00.png"; //images/00.png";
 var midiappy_loaded=false;
 img.addEventListener("load", function(){
     midiappy_loaded=true;
@@ -106,6 +107,7 @@ var w3cSlot={
     "ready" :[],
     "opacity":0.1,
     "rotate":0.001,
+    "rotateD":1,
     "yDirection": 1
 };
 var imgw3c=new Image();
@@ -121,10 +123,35 @@ for(var i=0; i<w3cSlot.path.length; i++) {
 imgw3c.src="images/w3c_00.png";
 
 
-
-mouseEmu();
+//mouseEmu();
 var fPos={"x":{"fix":[1000, 2320, 3320, 2320], "count":0}};
-function mouseEmu() {
+function mouseCenter() {
+    console.log("[Mouse Emulated at Center]");
+    if(typeof scene1!="undefined") {
+        if(rand(100)<40) {
+            for(var i=0; i<rand(1); i++) {
+                scene1.blast();
+                console.log("[blasted]");
+            }
+        }
+        
+        scene1.mx=2320;
+        scene1.my=height/2;
+        
+        if(mouseCursor==true) {
+            // mx, my: mouse x or y 
+            ctx.beginPath();
+            var bc=ctx.fillStyle;
+            ctx.fillRect(scene1.mx, scene1.my, 100, 100);
+            ctx.fillStyle="#ff0000";
+            ctx.fill();
+            ctx.fillStyle=bc;
+            ctx.closePath();
+        }
+    }
+}
+//////////
+function mouseEmu2() {
     setTimeout(function(){
         if(typeof scene1!="undefined") {
             if(rand(100)<40) {
@@ -151,7 +178,23 @@ function mouseEmu() {
             }
         }
         mouseEmu();
-    }, 6850+(rand(2)==1?1:-1)*1*Math.random());
+    }, 20000);
+}
+
+function changeDeltaMoveRate(type) {
+    switch(type) {
+      case "down":
+        if(deltaMoveRate>0.0005) {
+            deltaMoveRate-=0.001;
+        }
+        break;
+      case "up":
+        if(deltaMoveRate<0.5) {
+            deltaMoveRate+=0.001;
+        }
+        break;
+    }
+    return parseInt(1000*deltaMoveRate)/1000;
 }
 
 function changeSpeed(type) {
@@ -240,11 +283,11 @@ function Scene(max, mx, my) { // max:particle count
             
             pt.a = (pt.a + 0.1 * pt.speed) % (Math.PI * 2);
             
-            pt.x += pt.direct.x * (ox) * 0.01 + pt.kx;
-            pt.y += pt.direct.y * (oy) * 0.01 + pt.ky;
+            pt.x += deltaMoveRate * (pt.direct.x * (ox) * 0.01 + pt.kx);
+            pt.y += deltaMoveRate * (pt.direct.y * (oy) * 0.01 + pt.ky);
 
             pt.size = 18 + Math.sin(pt.a) * 5;
-            pt.sizem = 0.6*pt.size;
+            pt.sizem = 0.8*pt.size;
             
             if(i==midiappyNo /* Math.floor(pts.length/2) */) {
                 drawPtm(pt, "midiappy");
@@ -265,7 +308,6 @@ function Scene(max, mx, my) { // max:particle count
             "e":   ctx.getImageData(1900, 0,  160, 280)
 
         };
-
         nico_ctx.putImageData(nico_c["d-r"], 920, 680);
         nico_ctx.putImageData(nico_c["c"], 40, 360);
         nico_ctx.putImageData(nico_c["b"], 40, 680);
@@ -310,15 +352,19 @@ function drawPt(pt) {
     ctx.closePath();
     ctx.fill();
 }
-//var rotate=0.001;
 function drawPtm(pt, type) {
     var scale=pt.sizem;
     if(rand(100)<40) {
-        if(Math.random() > 0.3) {
-            midiappySlot.rotate=0.2*(Math.random() > 0.5 ? 1 : -1) * Math.random();
-        }
-        if(Math.random() > 0.3) {
-            w3cSlot.rotate=0.2*(Math.random() > 0.5 ? 1 : -1) * Math.random();
+        if(Math.random() > 0.4) {
+            // rotate midiappy
+            if(midiappySlot.rotate>0.2) midiappySlot.rotateD=-1;
+            if(midiappySlot.rotate<-0.2) midiappySlot.rotateD=1;
+            midiappySlot.rotate+=midiappySlot.rotateD * 0.02 * Math.random();
+
+            // rotate w3c logo
+            if(w3cSlot.rotate>0.2) w3cSlot.rotateD=-1;
+            if(w3cSlot.rotate<-0.2) w3cSlot.rotateD=1;
+            w3cSlot.rotate+=w3cSlot.rotateD * 0.02 * Math.random();
         }
     }
 
@@ -388,8 +434,28 @@ function drawPtm(pt, type) {
     ctx.fillStyle = pt.color.rgba();
     ctx.fill();
     ctx.closePath();
-}
 
+    // mouse emulation
+    //if(type=="midiappy"){ // || type=="w3c") {
+    if(type=="w3c"){
+        if(mouseEmued===false) {
+            if( pt.x < 1160 || pt.x > 3480 ) {
+                var num=rand(4)+1;
+                while(num>0) {
+                    mouseCenter();
+                    num--;
+                }
+                mouseEmued=true;
+            }
+        } else {
+            if( pt.x >= 1160 && pt.x <= 3480 ) {
+                mouseEmued=false;
+            }
+        }
+    }
+}
+var mouseEmued=false;
+    
 var op=1, ddd=1;
 function updateOpacity(type) {
     var op;
@@ -489,10 +555,11 @@ function drawNicoFrame(c){
 /* nico farre configuration */
 
 
+
 /* code sample */
+/*
 function rotateMidiappy() {
     if(load_done==true) {
-        conole.log("rotate");
         var imgSize=500;
         ctx.translate(300, 300);
         ctx.drawImage(img, -1*imgSize/2, -1*imgSize/2, imgSize, imgSize);
@@ -507,7 +574,7 @@ function rotateMidiappy() {
         ctx.translate(-300, -300);
     }
 }
-
+*/
 
 function Color(r,g,b,a){
     this.r=r;
