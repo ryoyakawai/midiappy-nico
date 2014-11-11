@@ -253,12 +253,12 @@ function Scene(max, mx, my) { // max:particle count
                 };
                 if(i==midiappyNo) {
                     //pts[i]["x"]=width/2+(rand(2)==1?1:-1)*(100+rand(100));
-                    pts[i]["x"]=3000;
+                    pts[i]["x"]=3850;
                     pts[i]["y"]=height/2;
                 }
                 if(i==w3cNo) {
                     //pts[i]["x"]=width/2+(rand(2)==1?1:-1)*(100+rand(100))+200;
-                    pts[i]["x"]=500;
+                    pts[i]["x"]=790;
                     pts[i]["y"]=height/2;
                 }
                 pts[i].backupa = pts[i].color.a;
@@ -440,7 +440,7 @@ function drawPtm(pt, type) {
     if(type=="w3c"){
         if(mouseEmued===false) {
             if( pt.x < 1160 || pt.x > 3480 ) {
-                var num=rand(4)+1;
+                var num=rand(3)+1;
                 while(num>0) {
                     mouseCenter();
                     num--;
